@@ -8,3 +8,4 @@ add_executable(CPP
 
 add_executable(Lee1447 Lee1447.cpp)
 add_executable(Lee717 Lee717.cpp)
+add_executable(lee599 lee599.cpp)
