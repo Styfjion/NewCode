@@ -20,5 +20,7 @@ int main(int argc, char const *argv[])
     function<void(int&)> test2 = funTwo;
     test2(a);
     cout << a << endl;
+    char testch = 'A';
+    cout << static_cast<char>(tolower(testch)) << endl;
     return 0;
 }
