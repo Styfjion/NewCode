@@ -6,7 +6,6 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-#include <atomic>
 
 void BlockingQueue::put(int data) {
     unique_lock<mutex> lock(cv_m);
