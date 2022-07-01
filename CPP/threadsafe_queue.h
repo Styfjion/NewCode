@@ -1,7 +1,3 @@
-//
-// Created by y00564656 on 2022/7/1.
-//
-
 #ifndef TEST_THREADSAFE_QUEUE_H
 #define TEST_THREADSAFE_QUEUE_H
 
