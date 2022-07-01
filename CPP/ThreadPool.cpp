@@ -1,6 +1,3 @@
-//
-// Created by y00564656 on 2022/7/1.
-//
 #include <queue>
 #include <functional>
 #include <memory>
