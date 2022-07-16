@@ -1,6 +1,3 @@
-//
-// Created by y00564656 on 2022/7/16.
-//
 #include <iostream>
 #include <thread>
 #include <mutex>
