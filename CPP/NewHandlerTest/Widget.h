@@ -1,7 +1,3 @@
-//
-// Created by y00564656 on 2022/11/14.
-//
-
 #ifndef TEST_WIDGET_H
 #define TEST_WIDGET_H
 #include <new>
