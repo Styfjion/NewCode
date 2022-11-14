@@ -1,7 +1,3 @@
-//
-// Created by y00564656 on 2022/11/14.
-//
-
 #ifndef TEST_NEWHANDLERHOLDER_H
 #define TEST_NEWHANDLERHOLDER_H
 
