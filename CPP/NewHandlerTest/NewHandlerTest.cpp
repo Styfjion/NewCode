@@ -1,6 +1,3 @@
-//
-// Created by y00564656 on 2022/11/14.
-//
 #include <iostream>
 #include "Widget.h"
 
