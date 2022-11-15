@@ -21,6 +21,7 @@ int main()
 
 //Unable to satisfy request for memory
 //Using Widget::operator new
+//Widget init
 //Using Widget::operator new[]
 
 
