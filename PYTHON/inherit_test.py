@@ -29,10 +29,10 @@ class B(A):
 
     def __init__(self):
         super().__init__()
-        self.b_i = 6
+        self.a_i = 6
 
     def test_ins(self):
-        print(f"{self.__class__.__name__}:ins b_i:{self.b_i}")
+        print(f"{self.__class__.__name__}:ins b_i:{self.a_i}")
 
     @classmethod
     def test_cls(cls):
@@ -76,5 +76,5 @@ if __name__ == '__main__':
 # B:ins b_i:6
 # A:cls a_c:2
 # b static method
-# B:ins a_i:2
+# B:ins a_i:6
 # B:cls a_c:4
