@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import create_engine, Table, MetaData, func, between, Column, Integer, String, DateTime
+from sqlalchemy import create_engine, Table, MetaData, func, between, Column, Integer, String, DateTime, select
 from sqlalchemy.orm import Session, sessionmaker, declarative_base
 
-URL = 'mysql+pymysql://root:816921@172.19.255.34:3306/test'
+URL = 'mysql+pymysql://root:816921@172.19.250.218:3306/test'
 ENGINE = create_engine(URL)
 
 Base = declarative_base(ENGINE)
@@ -42,8 +42,37 @@ class SqlTest(object):
         self.db.commit()
         self.db.close()
 
+    def query_batch_test_1(self):
+        partitions_list = []
+        for idx, row in enumerate(self.db.query(User.age, User.name).yield_per(3)):
+            partitions_list.append(row._asdict())
+            if (idx + 1) % 3 == 0:
+                yield partitions_list
+                partitions_list.clear()
+        yield partitions_list
+
+    def query_bach_test_2(self):
+        fields = ['age', 'name']
+        for partitions in self.db.execute(select(User.age, User.name).execution_options(yield_per=3)).partitions():
+            yield [dict(zip(fields, partition)) for partition in partitions]
+
+    def query_batch_test_3(self):
+        partitions_list = []
+        for idx, row in enumerate(self.db.execute(select(User.age, User.name).execution_options(yield_per=3))):
+            partitions_list.append(row._asdict())
+            if (idx + 1) % 3 == 0:
+                yield partitions_list
+                partitions_list.clear()
+        yield partitions_list
+
 
 if __name__ == '__main__':
     sql_test = SqlTest()
-    sql_test.create()
-    sql_test.add_test()
+    for record in sql_test.query_batch_test_1():
+        print(record)
+    print('**********************************')
+    for record in sql_test.query_bach_test_2():
+        print(record)
+    print('###################################')
+    for record in sql_test.query_batch_test_3():
+        print(record)
