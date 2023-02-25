@@ -50,7 +50,7 @@ void setListByPoint(vector<int>* data_ptr) {
 
     auto new_data = vector<int>();
     data_ptr = &new_data;
-
+    data_ptr->push_back(3);
     cout << "new point data is " << Data::trans(*data_ptr) << endl;
 }
 
