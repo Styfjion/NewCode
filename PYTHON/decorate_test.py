@@ -1,4 +1,5 @@
 from functools import wraps
+from typing import Callable
 
 
 # 无参装饰器常用形式
@@ -88,63 +89,88 @@ class DecorateTwo(object):
         return wrapper
 
 
+def method_decorator(key: str, value: str) -> Callable:
+    def out_wrapper(func: Callable) -> Callable:
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            self = args[0]
+            func(*args, **kwargs)
+            self.data[key] = value
+            self.post_process()
+        return wrapper
+    return out_wrapper
+
+
+class Target(object):
+    def __init__(self, data: dict):
+        self.data = data
+
+    @method_decorator("practise", "practise_val")
+    def insert_func(self):
+        print(f"inner data is {self.data}")
+
+    def post_process(self):
+        print(f"post process {self.data}")
+
+
 @decorate_one
-def test_one():
-    print("test_one")
+def practise_one():
+    print("practise_one")
 
 
 @decorate_two
-def test_two():
-    print("test_two")
+def practise_two():
+    print("practise_two")
 
 
 @decorate_tree
-def test_three():
-    print("test_three")
+def practise_three():
+    print("practise_three")
 
 
 @decorate_four("register four")
-def test_four():
-    print("test_four")
+def practise_four():
+    print("practise_four")
 
 
 @decorate_five("register five", "execute five")
-def test_five():
-    print("test_five")
+def practise_five():
+    print("practise_five")
 
 
 @decorate_one
-def test_param_one(param: int):
-    print(f"test_param_one:{param}")
+def practise_param_one(param: int):
+    print(f"practise_param_one:{param}")
 
 
 @decorate_five("register five param", "execute five param")
-def test_param_two(param: int):
-    print(f"test_param_five:{param}")
+def practise_param_two(param: int):
+    print(f"practise_param_five:{param}")
 
 
 @DecorateOne
-def test_class_one(param: int):
-    print(f"test_class_one:{param}")
+def practise_class_one(param: int):
+    print(f"practise_class_one:{param}")
 
 
 @DecorateTwo("register five param", "execute five param")
-def test_class_tow(param: int):
-    print(f"test_class_tow:{param}")
+def practise_class_tow(param: int):
+    print(f"practise_class_tow:{param}")
 
 
 if __name__ == '__main__':
     print("-----------------------------")
-    test_one()
-    test_two()
-    test_three()
-    test_four()
-    test_five()
-    test_param_one(1)
-    test_param_two(2)
-    test_class_one(3)
-    test_class_tow(4)
-
+    practise_one()
+    practise_two()
+    practise_three()
+    practise_four()
+    practise_five()
+    practise_param_one(1)
+    practise_param_two(2)
+    practise_class_one(3)
+    practise_class_tow(4)
+    target = Target({"prime": "prime_val"})
+    target.insert_func()
 '''
 register one
 register two
@@ -156,18 +182,20 @@ register five param
 register five param
 -----------------------------
 execute one
-test_one
-test_two
-test_three
-test_four
+practise_one
+practise_two
+practise_three
+practise_four
 execute five
-test_five
+practise_five
 execute one
-test_param_one:1
+practise_param_one:1
 execute five param
-test_param_five:2
+practise_param_five:2
 execute class decorate no param
-test_class_one:3
+practise_class_one:3
 execute five param
-test_class_tow:4
+practise_class_tow:4
+inner data is {'prime': 'prime_val'}
+post process {'prime': 'prime_val', 'practise': 'practise_val'}
 '''
