@@ -97,8 +97,26 @@ def method_decorator(key: str, value: str) -> Callable:
             func(*args, **kwargs)
             self.data[key] = value
             self.post_process()
+
         return wrapper
+
     return out_wrapper
+
+
+class MethodDecorator(object):
+    def __init__(self, key: str, value: str):
+        self.key = key
+        self.value = value
+
+    def __call__(self, func) -> Callable:
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            wrapper_obj = args[0]
+            func(*args, **kwargs)
+            wrapper_obj.data[self.key] = self.value
+            wrapper_obj.post_process()
+
+        return wrapper
 
 
 class Target(object):
@@ -107,6 +125,10 @@ class Target(object):
 
     @method_decorator("practise", "practise_val")
     def insert_func(self):
+        print(f"inner data is {self.data}")
+
+    @MethodDecorator("practise2", "practise_val2")
+    def class_insert_func(self):
         print(f"inner data is {self.data}")
 
     def post_process(self):
@@ -171,6 +193,25 @@ if __name__ == '__main__':
     practise_class_tow(4)
     target = Target({"prime": "prime_val"})
     target.insert_func()
+
+    target2 = Target({"prime2": "prime_val2"})
+    target.class_insert_func()
+
+
+if __name__ == '__main__':
+    print("-----------------------------")
+    practise_one()
+    practise_two()
+    practise_three()
+    practise_four()
+    practise_five()
+    practise_param_one(1)
+    practise_param_two(2)
+    practise_class_one(3)
+    practise_class_tow(4)
+    target = Target({"prime": "prime_val"})
+    target.insert_func()
+    
 '''
 register one
 register two
@@ -198,4 +239,5 @@ execute five param
 practise_class_tow:4
 inner data is {'prime': 'prime_val'}
 post process {'prime': 'prime_val', 'practise': 'practise_val'}
+post process {'prime': 'prime_val', 'practise': 'practise_val', 'practise2': 'practise_val2'}
 '''
