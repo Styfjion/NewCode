@@ -21,7 +21,11 @@ async function out(): Promise<any> {
     console.log("finish")
 }
 
-out().then().catch()
+out().then(() => {
+    console.log("Success")
+}).catch(err => {
+    console.log(err)
+})
 
 // g 1
 // f 1
@@ -29,4 +33,5 @@ out().then().catch()
 // g 2
 // f 2
 // finish
+// Success
 
