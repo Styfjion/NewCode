@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
 var ch1 = make(chan int)
@@ -18,13 +17,11 @@ func g() {
 
 func f() {
 	go g()
-	time.Sleep(time.Nanosecond) //休眠协程，重新调度
-	ch3 <- 1                    //异步通道，不阻塞继续执行
-	fmt.Println("async channel")
 	fmt.Println("f 1")
-	fmt.Println("block channel") //同步通道，阻塞执行
+	ch3 <- 1 //异步通道，不阻塞继续执行
+	fmt.Println("async channel")
 	_ = <-ch1
-	fmt.Println("unblock channel")
+	fmt.Println("block channel") //同步通道，阻塞执行
 	fmt.Println("f 2")
 	ch2 <- 1
 }
@@ -36,12 +33,13 @@ func main() {
 	fmt.Println("finish") //同步通道，等待协程
 }
 
-//start
-//g 1
-//async channel
-//f 1
-//block channel
-//g 2
-//unblock channel
-//f 2
-//finish
+// output:
+// start
+// f 1
+// g 1
+// g 2
+// async channel
+// block channel
+// f 2
+// finish
+// 说明：f 1和g 1的打印顺序不确定
