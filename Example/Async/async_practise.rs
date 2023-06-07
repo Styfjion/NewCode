@@ -8,7 +8,6 @@ async fn g() {
 
 async fn f() {
     let a = tokio::spawn(g());
-    tokio::task::yield_now().await;
     println!("f 1");
     a.await.unwrap();
     println!("f 2");
@@ -19,7 +18,9 @@ async fn main() {
     f().await
 }
 
+//output:
 // f 1
 // g 1
 // g 2
 // f 2
+//说明： f 1和g 1的打印顺序不确定
