@@ -7,12 +7,9 @@ using namespace std;
 vector<function<int()>> createCounter(int init) {
     static int curVal = init;
     static int prime = init;
-    auto add = [&](){return ++curVal;};
-    auto dec = [&]() {return --curVal;};
-    auto reset = [&](){
-        curVal = prime;
-        return curVal;
-    };
+    auto add = [&]() { return ++curVal; };
+    auto dec = [&]() { return --curVal; };
+    auto reset = [&]() { return curVal = prime; };
     return {add, dec, reset};
 }
 
