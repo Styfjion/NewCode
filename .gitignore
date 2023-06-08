@@ -1,2 +1,6 @@
 .idea/
 .vscode/
+node_modules/
+package.json
+package-lock.json
+ReadFileByLine/*.json
