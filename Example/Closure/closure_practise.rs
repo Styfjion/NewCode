@@ -1,3 +1,4 @@
+use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::Mutex;
 
 #[derive(Default)]
@@ -18,22 +19,47 @@ impl Counter {
         let add = ||{
             let mut cur_value = self.cur_value.lock().unwrap();
             *cur_value += 1;
-            return *cur_value;
+            *cur_value
         };
 
         let dec = ||{
             let mut cur_value = self.cur_value.lock().unwrap();
             *cur_value -= 1;
-            return *cur_value;
+            *cur_value
         };
 
         let reset = ||{
             let mut cur_value = self.cur_value.lock().unwrap();
             *cur_value = self.prime;
-            return *cur_value;
+            *cur_value
         };
-        return vec![Box::new(add), Box::new(dec), Box::new(reset)];
+        vec![Box::new(add), Box::new(dec), Box::new(reset)]
     }
+}
+
+fn create_counter(init: i32) -> Vec<Box<fn() -> i32>> {
+    static CUR_VALUE: AtomicI32 = AtomicI32::new(0);
+    static PRIME: AtomicI32 = AtomicI32::new(0);
+    CUR_VALUE.store(init, Ordering::Relaxed);
+    PRIME.store(init, Ordering::Relaxed);
+
+    let add = ||{
+        let cur_value = CUR_VALUE.fetch_add(1, Ordering::Relaxed);
+        cur_value + 1
+    };
+
+    let dec = ||{
+        let cur_value = CUR_VALUE.fetch_sub(1, Ordering::Relaxed);
+        cur_value - 1
+    };
+
+    let reset = ||{
+        let prime = PRIME.load(Ordering::Relaxed);
+        CUR_VALUE.store(prime, Ordering::Relaxed);
+        prime
+    };
+
+    vec![Box::new(add), Box::new(dec), Box::new(reset)]
 }
 
 fn main() {
@@ -42,7 +68,16 @@ fn main() {
     println!("{}", counters[0].as_mut()());
     println!("{}", counters[2].as_mut()());
     println!("{}", counters[1].as_mut()());
+    println!("----------------------------------------------");
+    let counters2 = create_counter(5);
+    println!("{}", counters2[0].as_ref()());
+    println!("{}", counters2[2].as_ref()());
+    println!("{}", counters2[1].as_ref()());
 }
+// 6
+// 5
+// 4
+// ----------------------------------------------
 // 6
 // 5
 // 4
