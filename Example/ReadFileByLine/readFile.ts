@@ -9,7 +9,7 @@ const rl = readline.createInterface({
 
 console.log("hello, world")
 let ret = []
-rl.on('line', (line) => {
+rl.on('line', (line: string) => {
     let splitLines = line.split('=')
     ret.push(splitLines[0])
 })
