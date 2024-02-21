@@ -26,6 +26,7 @@ pub fn min_refuel_stops(target: i32, start_fuel: i32, stations: Vec<Vec<i32>>) -
 }
 ```
 2. 滚动数组优化为一维
+`dp[i]`表示在第i个加油站时可以行驶的最远距离
 注意压缩后第二重循环需要倒序，因为`dp[i][j]`由`dp[i - 1][j - 1]`更新得到，压缩为一维后需要先更新后面的
 ```rust
 pub fn min_refuel_stops(target: i32, start_fuel: i32, stations: Vec<Vec<i32>>) -> i32 {
