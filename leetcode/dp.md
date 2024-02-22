@@ -199,3 +199,56 @@ impl Solution {
     }
 }
 ```
+## Lee879
+
+https://leetcode.cn/problems/profitable-schemes/solutions/819654/ying-li-ji-hua-by-leetcode-solution-3t8o/
+
+背包dp
+`dp[i][j][k]`表示进行在进行i件工作时，最多使用j个人时至少盈利为k的方案数
+`max(0, k - earn)`可以理解为 `if(k <= earn) dp[i][j][k]=dp[i-1][j][k]+dp[i-1][j][0]; //如果earn自己就完成了盈利要求，那么前i-1个任务盈利为0即可 else dp[i][j][k] = dp[i-1][j][k]+dp[i-1][j][k-earn]`;
+```rust
+pub fn profitable_schemes(n: i32, min_profit: i32, group: Vec<i32>, profit: Vec<i32>) -> i32 {
+    let kind = group.len();
+    const MOD: u64 = 1e9 as u64 + 7;
+    let mut dp = vec![vec![vec![0; (min_profit + 1) as usize]; (n + 1) as usize]; kind + 1];
+    for j in 0..(n + 1) as usize {
+        dp[0][j][0] = 1;
+    }
+    for i in 1..kind + 1 {
+        for j in 0..(n + 1) as usize {
+            for k in 0..(min_profit + 1) as usize {
+                dp[i][j][k] = dp[i - 1][j][k];
+                if j >= group[i - 1] as usize {
+                    dp[i][j][k] = (dp[i][j][k]
+                        + dp[i - 1][j - group[i - 1] as usize]
+                            [std::cmp::max(0, k as i32 - profit[i - 1]) as usize])
+                        % MOD
+                }
+            }
+        }
+    }
+    dp[kind][n as usize][min_profit as usize] as i32
+}
+```
+滚动数组优化
+```rust
+pub fn profitable_schemes(n: i32, min_profit: i32, group: Vec<i32>, profit: Vec<i32>) -> i32 {
+    let kind = group.len();
+    const MOD: u64 = 1e9 as u64 + 7;
+    let mut dp = vec![vec![0; (min_profit + 1) as usize]; (n + 1) as usize];
+    for i in 0..(n + 1) as usize {
+        dp[i][0] = 1;
+    }
+    for i in 1..kind + 1 {
+        for j in (group[i - 1] as usize..(n + 1) as usize).rev() {
+            for k in (0..(min_profit + 1) as usize).rev() {
+                dp[j][k] = (dp[j][k]
+                    + dp[j - group[i - 1] as usize]
+                        [std::cmp::max(0, k as i32 - profit[i - 1]) as usize])
+                    % MOD
+            }
+        }
+    }
+    dp[n as usize][min_profit as usize] as i32
+}
+```
