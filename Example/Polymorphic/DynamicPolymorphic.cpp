@@ -1,6 +1,9 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
+//
+// Created by y00564656 on 25-1-20.
+//
 using Cost = int32_t;
 using Penalty = int32_t;
 
@@ -28,7 +31,7 @@ constexpr int32_t CPU_INITIAL_COST = 50;
 constexpr int32_t CPU_COST_THRESHOLD = 2;
 constexpr int32_t CPU_MULTIPLIER = 10;
 
-class CpuResource : public Resource
+class CpuResource final : public Resource
 {
 public:
     explicit CpuResource(const int32_t capacity): Resource(capacity)
@@ -53,7 +56,7 @@ constexpr int32_t MEM_INITIAL_COST = 30;
 constexpr int32_t MEM_MULTIPLIER = 2;
 using MB = int32_t;
 
-class MemoryResource : public Resource
+class MemoryResource final : public Resource
 {
 public:
     explicit MemoryResource(const MB capacity): Resource(capacity)
@@ -78,7 +81,7 @@ constexpr int32_t STORAGE_COST_THRESHOLD = 3;
 constexpr double STORAGE_MULTIPLIER = 1.5;
 using GB = int32_t;
 
-class StorageResource : public Resource
+class StorageResource final : public Resource
 {
 public:
     explicit StorageResource(const GB capacity): Resource(capacity)
