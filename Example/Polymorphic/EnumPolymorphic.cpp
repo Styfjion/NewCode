@@ -96,7 +96,7 @@ Penalty ComputePenalty(const Resource& resource, const int32_t time)
 {
     return std::visit([&]<typename T>(const T& inner)
     {
-        if constexpr (std::is_same_v<T, StorageResource>)
+        if constexpr (std::is_same_v<std::decay_t<T>, StorageResource>)
         {
             return inner.ComputePenalty(time);
         }
