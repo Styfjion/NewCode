@@ -1,0 +1,322 @@
+## 动态规划
+
+动态规划目标值和候选值有两种循环方式
+对于寻找方法数的题目没有区别，但对于寻找具体的方法集合的题目，先循环候选值会造成结果重复
+
+### 寻找最少方案数
+例：lee32零钱兑换 https://leetcode.cn/problems/coin-change/solutions/132979/322-ling-qian-dui-huan-by-leetcode-solution/
+
+先循环目标值，再循环候选值
+```cpp
+class Solution {
+public:
+    int coinChange(vector<int>& coins, int amount) {
+        int Max = amount + 1;
+        vector<int> dp(amount + 1, Max);
+        dp[0] = 0;
+        for (int i = 1; i <= amount; ++i) {
+            for (int j = 0; j < (int)coins.size(); ++j) {
+                if (coins[j] <= i) {
+                    dp[i] = min(dp[i], dp[i - coins[j]] + 1);
+                }
+            }
+        }
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+};
+```
+先循环候选值，再循环目标值
+```cpp
+class Solution
+{
+public:
+    int coinChange(vector<int> &coins, int amount)
+    {
+        vector<int> dp(amount + 1, amount+1);
+        dp[0] = 0;
+        for (int coin : coins)
+        {
+            for (int j = coin; j <= amount; j++)
+            {
+                dp[j] = min(dp[j], dp[j - coin] + 1);
+            }
+        }
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+};
+```
+
+### 寻找所有方案数（无序）
+
+例：lee39 https://leetcode.cn/problems/combination-sum/
+
+必须先循环候选值，先循环目标值会导致重复
+
+ai分析如下：
+两种解法在组合生成时出现重复或不重复的关键差异在于 **候选数的遍历顺序和动态规划的更新逻辑**。以下是详细分析：
+
+---
+
+### **解法一：结果有重复**
+```cpp
+class Solution {
+public:
+    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
+        vector<vector<vector<int>>> dp(target + 1);
+        dp[0].emplace_back();  // 初始状态：和为0的空组合
+        for (int i = 1; i <= target; i++) {
+            for (int candidate : candidates) {  // 遍历所有候选数
+                if (candidate <= i) {
+                    for (auto& oldGroup : dp[i - candidate]) {
+                        vector<int> newGroup = oldGroup;
+                        newGroup.emplace_back(candidate);
+                        dp[i].push_back(newGroup);
+                    }
+                }
+            }
+        }
+        return dp[target];
+    }
+};
+```
+
+#### **问题原因**：
+1. **遍历顺序导致重复**：
+   - **外层循环是 `i`（目标值）**，内层循环遍历 **所有候选数**。
+   - 对于每个 `i`，**所有候选数都会被无序尝试**，导致 **不同顺序的组合被视为不同的解**。
+   - 例如：当 `candidates = [2,3]`，`target=5` 时：
+     - `i=5` 时遍历 `2` 和 `3`：
+       - 先选 `2`：`dp[3]` 中的组合 `[3]` → 新组合 `[3,2]`。
+       - 再选 `3`：`dp[2]` 中的组合 `[2]` → 新组合 `[2,3]`。
+     - 这两个组合 `[2,3]` 和 `[3,2]` 被视为不同，但实际是同一组合（无序）。
+
+2. **动态规划更新逻辑**：
+   - 每次更新 `dp[i]` 时，**所有候选数的顺序未被约束**，导致组合的顺序可能重复。
+
+---
+
+### **解法二：结果无重复**
+```cpp
+class Solution {
+public:
+    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
+        vector<vector<vector<int>>> dp(target + 1);
+        dp[0] = {{}};  // 初始状态
+        for (int i = 0; i < candidates.size(); i++) {  // 先遍历物品（候选数）
+            int candidate = candidates[i];
+            for (int j = candidate; j <= target; j++) {  // 遍历目标值
+                for (auto& group : dp[j - candidate]) {
+                    vector<int> newGroup = group;
+                    newGroup.push_back(candidate);
+                    dp[j].push_back(newGroup);
+                }
+            }
+        }
+        return dp[target];
+    }
+};
+```
+
+#### **无重复的原因**：
+1. **遍历顺序约束组合顺序**：
+   - **外层循环是候选数**（按固定顺序），内层循环遍历目标值 `j`。
+   - **每个候选数仅在之前候选数的基础上添加**，确保组合中的元素 **按候选数的顺序排列**。
+   - 例如：`candidates = [2,3]`：
+     - 处理 `2` 时，生成的组合只能包含 `2` 及其之前的候选数（但 `2` 是第一个，所以只有 `[2]`）。
+     - 处理 `3` 时，只能在 `dp[j - 3]` 的组合基础上添加 `3`，而 `dp[j - 3]` 中的组合只能包含 `2` 或更早的候选数。
+     - 因此，组合中的元素顺序始终按候选数的顺序排列（如 `[2,3]`），而不会出现 `[3,2]`。
+
+2. **动态规划更新逻辑**：
+   - **每个候选数仅参与一次更新**，且后续候选数的添加不会回溯到之前的候选数，从而避免了顺序不同的重复组合。
+
+---
+
+### **对比总结**
+| **特征**               | **解法一（有重复）**                     | **解法二（无重复）**                     |
+|------------------------|----------------------------------------|----------------------------------------|
+| **遍历顺序**           | 先遍历目标值 `i`，再遍历所有候选数       | 先遍历候选数，再遍历目标值 `j`          |
+| **组合顺序约束**       | 无约束 → 不同顺序被视为不同组合          | 候选数顺序固定 → 组合按候选数顺序排列    |
+| **重复原因**           | 同一组合的**不同排列**被多次生成          | 每个组合仅按候选数顺序生成一次          |
+
+---
+
+### **关键点**
+1. **动态规划的遍历顺序**：
+   - **解法一**：目标值 `i` 驱动，导致候选数的**无序尝试**，产生重复。
+   - **解法二**：候选数驱动，强制组合按候选数顺序生成，避免重复。
+
+2. **组合的唯一性**：
+   - 背包问题中，若要求组合**无顺序影响**（如 `[2,3]` 和 `[3,2]` 视为相同），需通过遍历顺序或排序确保唯一性。
+   - **解法二**通过候选数的**固定顺序遍历**，确保组合的唯一性；而**解法一**未约束顺序，导致重复。
+
+---
+
+### **修复解法一的重复问题**
+若想让解法一无重复，需在生成组合后**排序并去重**，例如：
+```cpp
+// 在返回前对结果去重
+sort(dp[target].begin(), dp[target].end());
+dp[target].erase(unique(dp[target].begin(), dp[target].end()), dp[target].end());
+```
+但此方法效率较低。**解法二的遍历顺序设计**是更优的解决方案。
+
+
+
+## 回溯解法
+例1：lee39 https://leetcode.cn/problems/combination-sum/ (可重复)
+
+```java []
+public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        List<List<Integer>> res = new ArrayList<>();
+        backtrack(candidates, 0, target, new ArrayList<>(), res);
+        return res;
+    }
+
+    void backtrack(int[] candidates, int index, int target, List<Integer> list, List<List<Integer>> res) {
+        if(0 == target) {
+            res.add(new ArrayList<>(list));
+        } else for (int i = index; i < candidates.length; ++i) {
+            if(target < candidates[i]) continue;//剪枝
+            list.add(candidates[i]);
+            backtrack(candidates, i, target - candidates[i], list, res);
+            list.remove(list.size() - 1); //回溯
+        }
+    }
+```
+```cpp []
+class Solution {
+public:
+    void dfs(span<int> slice, vector<vector<int>>& res, vector<int>& cur, int target) {
+        if (target == 0) {
+            res.emplace_back(cur);
+            return;
+        }
+
+        for(size_t i = 0; i < slice.size(); i++) {
+            if (slice[i] > target) {
+                continue;
+            }
+            cur.emplace_back(slice[i]);
+            dfs(slice.subspan(i), res, cur, target - slice[i]);
+            cur.pop_back();
+        }
+    }
+
+    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
+        vector<vector<int>> res;
+        vector<int> cur;
+        dfs(span(candidates), res, cur, target);
+        return res;
+    }
+};
+```
+ai分析如下：
+嗯，用户的问题是关于组合总和问题的解法，需要解释给定的Java代码。首先，我得理解这个解法是如何工作的。根据用户提供的代码，这是一个使用回溯算法的解决方案。我需要结合搜索结果中的相关内容来分析。
+
+首先，回忆之前学过的组合总和问题。根据搜索结果，比如网页1和网页6，都是用回溯法来处理的。回溯法通常用于解决这类需要穷举所有可能组合的问题。网页1提到，通过递归和回溯来构建可能的组合，并在满足条件时保存结果。网页6的代码结构类似，用for循环遍历候选数组，然后递归调用回溯函数。
+
+现在看用户提供的解法。函数combinationSum初始化结果列表，并调用backtrack方法。backtrack的参数包括当前索引index、剩余目标值target、当前组合list和结果res。当target减到0时，将当前list加入结果。否则，循环从当前index开始，尝试每个候选数，如果候选数不大于剩余target，则加入list，递归调用，然后回溯。
+
+这里的关键点是为什么循环从index开始？根据网页3和网页4的解释，这样做是为了避免重复的组合。例如，当处理完以某个数开头的组合后，不需要再回头处理更小的数，这样保证了组合是按顺序生成的，避免出现如[2,3]和[3,2]这样的重复。同时，因为每个数字可以重复使用，递归时传入的索引是i而不是i+1，这样下一层还可以再次选择当前数字。
+
+剪枝的部分，如果当前候选数大于剩余target，就跳过，这减少了不必要的递归，提升了效率。网页1和网页4的代码中也提到类似的剪枝操作，提前终止无法满足条件的情况。
+
+回溯的步骤是在递归调用后，从list中移除最后一个元素，恢复状态，以便尝试下一个可能的候选数。这在所有回溯问题中都是标准做法，如网页3和网页6中的代码示例所示。
+
+另外，网页2提到组合总和问题的关键点，包括允许重复使用元素，这对应解法中的递归时传入i而不是i+1。而网页4的伪代码也展示了同样的结构，循环从start开始，递归传递当前的i，允许重复选取。
+
+所以，这个解法通过回溯法，按顺序选择候选数，允许重复使用，并通过剪枝和索引控制来高效生成所有合法组合。需要把这些点组织起来，解释代码的结构和原理，引用相关的搜索结果来支持解释。
+
+
+
+
+该解法采用了回溯算法（Backtracking）来解决组合总和问题，其核心思想是通过递归遍历所有可能的组合，并通过剪枝优化效率。以下是对该解法的详细解释：
+
+---
+
+### 一、算法框架解析
+1. **初始化与入口函数**  
+   `combinationSum` 函数初始化结果列表 `res` 并调用回溯函数 `backtrack`，传入参数包括候选数组 `candidates`、起始索引 `0`、目标值 `target`、当前组合 `list` 和结果集 `res`。
+
+2. **终止条件**  
+   当剩余目标值 `target` 减至 `0` 时，说明当前组合满足条件，将其加入结果列表 `res`。
+
+3. **递归与回溯**  
+   • **循环遍历候选数**：从当前索引 `index` 开始遍历数组，保证组合中元素的顺序性（避免重复组合如 `[2,3]` 和 `[3,2]`）。
+   • **剪枝优化**：若当前候选数 `candidates[i]` 大于剩余目标值 `target`，跳过该数（后续更大的数更不可能满足条件）。
+   • **递归调用**：将 `candidates[i]` 加入当前组合 `list`，递归时传递更新后的 `target - candidates[i]`，并保持索引 `i`（允许重复使用该数）。
+   • **回溯操作**：递归返回后，从 `list` 末尾移除 `candidates[i]`，尝试下一个候选数。
+
+---
+
+### 二、关键设计点
+1. **避免重复组合的索引控制**  
+   循环从 `index` 开始而非 `0`，确保每个组合中的元素按候选数组顺序生成。例如，若候选数组为 `[2,3,6,7]`，则不会同时生成 `[2,3]` 和 `[3,2]`，因为后者会被索引过滤。
+
+2. **允许元素重复使用的机制**  
+   递归时传递 `i` 而非 `i+1`，使得同一元素可在后续递归中再次被选取。例如，候选数 `2` 可被多次使用生成 `[2,2,3]`。
+
+3. **剪枝提升效率**  
+   跳过 `candidates[i] > target` 的情况，避免无效递归。例如，若剩余 `target=3` 且候选数为 `6`，直接跳过该分支。
+
+---
+
+### 三、时间复杂度与空间复杂度
+• **时间复杂度**：最坏情况下为指数级（如候选数为 `[1]`，目标值极大时需遍历所有可能组合），但因剪枝优化和题目约束（组合数少于150个），实际效率较高。
+• **空间复杂度**：取决于递归栈深度和结果集大小，最坏情况下为 `O(target/min(candidates))`（如候选数为 `[2]`，目标值 `8` 时递归4层）。
+
+---
+
+### 四、示例推演（以 `candidates = [2,3,6,7], target = 7` 为例）
+1. **初始调用**  
+   `backtrack(candidates, 0, 7, [], res)`。
+
+2. **递归过程**  
+   • 选取 `2` → 剩余 `target=5` → 递归 `backtrack(..., 0, 5, [2], ...)`  
+     ◦ 再次选取 `2` → 剩余 `3` → 递归 `backtrack(..., 0, 3, [2,2], ...)`  
+       ◦ 选取 `3` → 剩余 `0` → 加入结果 `[2,2,3]`。
+   • 回溯后尝试 `3` → 剩余 `4` → 递归失败（后续候选数 `3,6,7` 均不满足）。
+   • 最终选取 `7` → 剩余 `0` → 加入结果 `[7]`。
+
+---
+
+### 五、与其他方法的对比
+1. **动态规划**  
+   若仅需统计组合数量（如组合总和Ⅳ），动态规划更高效；但本题需输出具体组合，回溯法更直接。
+2. **去重问题**  
+   若候选数组包含重复元素（如组合总和Ⅱ），需额外排序和标记逻辑，但本题因数组无重复，无需处理。
+
+---
+
+### 六、总结
+该解法通过回溯算法高效地穷举所有可能组合，通过索引控制和剪枝避免重复计算，是解决此类组合问题的经典范式。其核心在于理解递归中索引传递的作用及回溯的“尝试-撤销”机制。
+
+例2：lee78 子集 https://leetcode.cn/problems/subsets/ （不可重复）
+```cpp
+class Solution {
+public:
+    void dfs(span<int> numsSlice, vector<int> &curRes, size_t targetLen) {
+        if (curRes.size() == targetLen) {
+            res.emplace_back(curRes);
+            return;
+        }
+
+        for (size_t i = 0; i < numsSlice.size(); ++i) {
+            curRes.emplace_back(numsSlice[i]);
+            dfs(numsSlice.subspan(i + 1), curRes, targetLen);
+            curRes.pop_back();
+        }
+    }
+
+    std::vector<vector<int> > subsets(vector<int> &nums) {
+        for (size_t i = 1; i <= nums.size(); ++i) {
+            vector<int> curRes;
+            dfs(span(nums), curRes, i);
+        }
+        return res;
+    }
+
+private:
+    vector<vector<int> > res{{}};
+};
+```
