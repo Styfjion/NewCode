@@ -8,11 +8,11 @@ void heapfy(vector<int> &attr, int heapSize, int root)
     int left = root * 2 + 1;
     int right = root * 2 + 2;
     int largest = root;
-    if (left < heapSize && attr[left] > attr[root])
+    if (left < heapSize && attr[left] > attr[largest])
     {
         largest = left;
     }
-    if (right < heapSize && attr[right] > attr[root])
+    if (right < heapSize && attr[right] > attr[largest])
     {
         largest = right;
     }
