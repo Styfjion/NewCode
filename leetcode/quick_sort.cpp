@@ -4,23 +4,25 @@
 using namespace std;
 
 int patition(vector<int>&attr, int begin, int end) {
-    int pivot = attr[begin];
-    int left = begin, right = end;
-    while (left < right) {
-        while (left < right && attr[right] >= pivot) {
-            right--;
-        }
-
-        while (left < right && attr[left] <= pivot) {
+    int pivot = nums[begin];
+    int left = begin + 1, right = end;
+    while (true) {
+        while (left <= end && nums[left] < pivot) {
             left++;
         }
-
-        if (left < right) {
-            swap(attr[left], attr[right]);
+        while (right >= begin + 1 && nums[right] > pivot) {
+            right--;
+        }
+        if (left <= right) {
+            swap(nums[left], nums[right]);
+            left += 1;
+            right -= 1;
+        } else {
+            break;
         }
     }
-    swap(attr[left], attr[begin]);
-    return left;
+    swap(nums[right], nums[begin]);
+    return right;
 }
 
 void quickSort(vector<int>&attr, int begin, int end) {
