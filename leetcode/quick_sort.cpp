@@ -4,24 +4,24 @@
 using namespace std;
 
 int patition(vector<int>&attr, int begin, int end) {
-    int pivot = nums[begin];
+    int pivot = attr[begin];
     int left = begin + 1, right = end;
     while (true) {
-        while (left <= end && nums[left] < pivot) {
+        while (left <= end && attr[left] < pivot) {
             left++;
         }
-        while (right >= begin + 1 && nums[right] > pivot) {
+        while (right >= begin + 1 && attr[right] > pivot) {
             right--;
         }
         if (left <= right) {
-            swap(nums[left], nums[right]);
+            swap(attr[left], attr[right]);
             left += 1;
             right -= 1;
         } else {
             break;
         }
     }
-    swap(nums[right], nums[begin]);
+    swap(attr[right], attr[begin]);
     return right;
 }
 
